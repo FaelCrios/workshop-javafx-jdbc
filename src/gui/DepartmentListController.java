@@ -58,8 +58,8 @@ public class DepartmentListController implements Initializable {
 
 	// Função para inicializar nossas colunas com os valores que desejamos
 	private void initializeNodes() {
-		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("Id"));
-		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("Name"));
+		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
+		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
 		// Nos definimos um ponto de "apoio" para nossa janela, sendo ela a principal
 		// Para que ela possa ter uma orientação de quais seriam as configurações
@@ -73,7 +73,7 @@ public class DepartmentListController implements Initializable {
 		tableViewDepartment.prefHeightProperty().bind(stage.heightProperty());
 
 	}
-
+ 
 	public void updateTableView() {
 		if (service == null) {
 			throw new IllegalStateException("Service was null");
