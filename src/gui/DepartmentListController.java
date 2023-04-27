@@ -1,18 +1,27 @@
 package gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import gui.util.Alerts;
+import gui.util.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Department;
 import model.services.DepartmentService;
@@ -41,8 +50,9 @@ public class DepartmentListController implements Initializable {
 
 	private ObservableList<Department> obsList;
 
-	public void onBtNewAction() {
-		System.out.println("onBTnewAction");
+	public void onBtNewAction(ActionEvent event) {
+		Stage parentStage = Utils.currentStage(event);
+		createDialogForm("/gui/DepartmentForm.fxml", parentStage);
 	}
 
 	// Injeção de dependencia manual
@@ -83,4 +93,38 @@ public class DepartmentListController implements Initializable {
 		tableViewDepartment.setItems(obsList);
 	}
 
+	//Esta função é para criarmos uma janela sobre um stage pai, por isso passamos por parâmetro qual o stage que está criando
+	// Uma tela
+	private void createDialogForm(String absoluteName ,Stage parentStage) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			
+			//Carregamos o nosso pane, que será nosso formulario
+			Pane pane = loader.load();
+			
+			//Quando vamos iniciar uma janela de dialogo em frente ao nosso stage, é necessario
+			//instancia um novo stage desa forma o dialogStage
+			Stage dialogStage = new Stage();
+			
+			//E aqui entram as configurações
+			dialogStage.setTitle("Enter department data");
+			
+			//Definimos qual sera o stage que iremos carregar
+			dialogStage.setScene(new Scene(pane));
+			
+			//Se poderemos mudar o tamanho de nossa tela
+			dialogStage.setResizable(false);
+			
+			//A partir de quem que ele irá surgir
+			dialogStage.initOwner(parentStage);
+			
+			//E qual será o tipo de janela que ele irá ser
+			dialogStage.initModality(Modality.WINDOW_MODAL);
+			dialogStage.showAndWait();
+		}
+		catch(IOException e ) {
+			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(),AlertType.ERROR);
+		}
+	}
+	
 }
