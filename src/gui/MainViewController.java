@@ -3,6 +3,7 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import application.Main;
 import gui.util.Alerts;
@@ -15,6 +16,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable{
 
@@ -35,15 +37,19 @@ public class MainViewController implements Initializable{
 	}
 	
 
+	//Para que possamos definir uma dependencia de forma certa e instanciar nosso contudo, passaremos a inicialização por parâmetro
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
+		} );
 	}
 	
 
 	@FXML
 	public void onMenuItemAboutAction() {
-		loadView("/gui/About.fxml");
+		loadView("/gui/About.fxml", x -> {});
 	}
 	
 	@Override
@@ -54,7 +60,10 @@ public class MainViewController implements Initializable{
 
 	//Como o nosso processo é multiThread sendo por causa da javaFx, o synchronized entra para proibir que nosso processo
 	//seja interrompido
-	private synchronized void loadView(String absoluteName) {
+	//Como passaremos nossas inicializações por parâmetro
+	//Precisamos utilizar nossa interface de consumer que foi visto antes, para que quando necessario
+	//Possamos utilizar as expressões lambdas
+	private synchronized<T> void loadView(String absoluteName, Consumer<T> initializingAction) {
 		try {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
 		VBox newVBox = loader.load();
@@ -77,6 +86,13 @@ public class MainViewController implements Initializable{
 		//E por fim adicionamos o conteudo Menu, e o conteudo da página que desejamos adicionar
 		mainVBox.getChildren().add(mainMenu);
 		mainVBox.getChildren().addAll(newVBox.getChildren());
+		
+		
+		//Vai retornar o nosso controlador que desejamos
+		//E assim vai executar o nosso genérico que nesse caso é a nossa expressão Lambda
+		T controller = loader.getController();
+		initializingAction.accept(controller);
+		
 		
 		}
 		catch(IOException e) {
