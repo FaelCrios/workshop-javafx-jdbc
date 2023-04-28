@@ -52,7 +52,8 @@ public class DepartmentListController implements Initializable {
 
 	public void onBtNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
-		createDialogForm("/gui/DepartmentForm.fxml", parentStage);
+		Department obj = new Department();
+		createDialogForm(obj,"/gui/DepartmentForm.fxml", parentStage);
 	}
 
 	// Injeção de dependencia manual
@@ -95,12 +96,22 @@ public class DepartmentListController implements Initializable {
 
 	//Esta função é para criarmos uma janela sobre um stage pai, por isso passamos por parâmetro qual o stage que está criando
 	// Uma tela
-	private void createDialogForm(String absoluteName ,Stage parentStage) {
+	private void createDialogForm(Department obj ,String absoluteName ,Stage parentStage) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
 			
 			//Carregamos o nosso pane, que será nosso formulario
 			Pane pane = loader.load();
+			
+			
+			//Aqui passaremos uma referencia para o nosso controlador, para que seja possivel 
+			//Alterar seu conteudo
+			DepartmentFormController controller = loader.getController();
+			//Passamos nossa referencia como haviamos criado a nossa instanciação no arquivo pai
+			controller.setDepartment(obj);
+			
+			//E aqui atualizamos o conteudo presente no controller
+			controller.updateFormData();
 			
 			//Quando vamos iniciar uma janela de dialogo em frente ao nosso stage, é necessario
 			//instancia um novo stage desa forma o dialogStage
