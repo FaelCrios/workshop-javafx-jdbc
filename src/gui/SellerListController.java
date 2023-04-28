@@ -1,6 +1,7 @@
 package gui;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -29,22 +30,27 @@ import model.services.SellerService;
 
 public class SellerListController implements Initializable, DataChangeListener {
 
-	// Sobre o que será nossa View
 	@FXML
 	private TableView<Seller> tableViewSeller;
 
-	// Aqui estamos criando uma dependencia, de forma fraca
 	private SellerService service;
 
-	// Neste caso nossa TableColumn<O tipo da entidade, e depois o tipo da coluna>
-	// Outra coisa, não é porque foi definido que as colunas irão funcionar,
-	// precisaremos instancia-las
-	// Com a função initialize da nossa interface, criamos a função para isso
 	@FXML
 	private TableColumn<Seller, Integer> tableColumnId;
 
 	@FXML
 	private TableColumn<Seller, String> tableColumnName;
+	
+	@FXML
+	private TableColumn<Seller, String> tableColumnEmail;
+	
+	@FXML
+	private TableColumn<Seller, Date> tableColumnBirthDate;
+	
+	@FXML
+	private TableColumn<Seller, Double> tableColumnBaseSalary;
+	
+	
 
 	@FXML
 	private TableColumn<Seller, Seller> tableColumnEDIT;
@@ -114,10 +120,9 @@ public class SellerListController implements Initializable, DataChangeListener {
 	public void onBtNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
 		Seller obj = new Seller();
-		//createDialogForm(obj, "/gui/SellerForm.fxml", parentStage);
+
 	}
 
-	// Injeção de dependencia manual
 	public void setSellerService(SellerService service) {
 		this.service = service;
 	}
@@ -128,20 +133,19 @@ public class SellerListController implements Initializable, DataChangeListener {
 
 	}
 
-	// Função para inicializar nossas colunas com os valores que desejamos
+
+		//precisa ser identido ao que está na classe!
 	private void initializeNodes() {
 		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
 		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+		tableColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+		tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy");
+		tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
+		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2);
 
-		// Nos definimos um ponto de "apoio" para nossa janela, sendo ela a principal
-		// Para que ela possa ter uma orientação de quais seriam as configurações
-		// desejadas
-		// Com o (Stage)Main.getMainScene().getWindow() selecionamos a scene principal e
-		// castamos ela para um stage
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 
-		// E depois nós depifinos a nossa table com os valores de height sendo como os
-		// da tela em si
 		tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
 
 	}
@@ -156,10 +160,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 		initEditButtons();
 		initRemoveButtons();
 	}
-
-	// Esta função é para criarmos uma janela sobre um stage pai, por isso passamos
-	// por parâmetro qual o stage que está criando
-	// Uma tela
+	
 //	private void createDialogForm(Seller obj, String absoluteName, Stage parentStage) {
 //		try {
 //			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
@@ -209,9 +210,6 @@ public class SellerListController implements Initializable, DataChangeListener {
 //			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
 //		}
 
-	// Basicamente este será o nosso observador, que a partir do momento que a outra
-	// classe Controller,
-	// Emitir o sinal, efetuaremos uma ação: nesse caso a atualização dos dados
 	@Override
 	public void onDataChange() {
 		updateTableView();
