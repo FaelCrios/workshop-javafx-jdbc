@@ -3,7 +3,9 @@ package gui;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import db.DbException;
 import gui.listeners.DataChangeListener;
@@ -18,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Department;
+import model.exceptions.ValidationException;
 import model.services.DepartmentService;
 
 public class DepartmentFormController implements Initializable {
@@ -77,7 +80,11 @@ public class DepartmentFormController implements Initializable {
 		
 		//Para quando terminar a operação, a janela seja fechada
 		Utils.currentStage(event).close();
-		} catch(DbException e) {
+		} 
+		catch(ValidationException e) {
+			setErrorMessages(e.getErrors());
+		}
+		catch(DbException e) {
 			Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
 		}
 	
@@ -96,9 +103,25 @@ public class DepartmentFormController implements Initializable {
 	private Department getFormData() {
 		Department obj = new Department();
 
+		ValidationException exception = new ValidationException("ValidationError");
+		
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
+		
+		
+		//se o campo txt for nulo ou vazio.. ele barra
+		if(txtName.getText() == null || txtName.getText().trim().equals("")) {
+			exception.addErrors("name", "Field can't be empty");
+		}
 		obj.setName(txtName.getText());
+		
+		//Se a nossa lista de erros tiver algum erro.. ele barra
+		if(exception.getErrors().size() > 0) {
+			throw exception;
+		}
+		
 		return obj;
+		
+		
 	}
 
 	@FXML
@@ -128,5 +151,10 @@ public class DepartmentFormController implements Initializable {
 		txtName.setText(entity.getName());
 
 	}
-
+	private void setErrorMessages(Map<String, String> error) {
+		Set<String> fields = error.keySet();
+		if(fields.contains("name")) {
+			labelErrorName.setText(error.get("name"));
+		};
+	}
 }
