@@ -110,6 +110,9 @@ public class DepartmentListController implements Initializable {
 			//Passamos nossa referencia como haviamos criado a nossa instanciação no arquivo pai
 			controller.setDepartment(obj);
 			
+			//Injeção de dependencia do DepartmentService
+			controller.setDepartmentService(new DepartmentService());
+			
 			//E aqui atualizamos o conteudo presente no controller
 			controller.updateFormData();
 			
