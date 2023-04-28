@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.collections.FXCollections;
@@ -26,7 +27,7 @@ import javafx.stage.Stage;
 import model.entities.Department;
 import model.services.DepartmentService;
 
-public class DepartmentListController implements Initializable {
+public class DepartmentListController implements Initializable, DataChangeListener{
 
 	// Sobre o que será nossa View
 	@FXML
@@ -107,11 +108,16 @@ public class DepartmentListController implements Initializable {
 			//Aqui passaremos uma referencia para o nosso controlador, para que seja possivel 
 			//Alterar seu conteudo
 			DepartmentFormController controller = loader.getController();
-			//Passamos nossa referencia como haviamos criado a nossa instanciação no arquivo pai
-			controller.setDepartment(obj);
+				
+				//Passamos nossa referencia como haviamos criado a nossa instanciação no arquivo pai
+				controller.setDepartment(obj);
+				
+				//Injeção de dependencia do DepartmentService
+				controller.setDepartmentService(new DepartmentService());
+		
+			//Inscrição para o evento do subject
+			controller.subscribeDataChangeListener(this);
 			
-			//Injeção de dependencia do DepartmentService
-			controller.setDepartmentService(new DepartmentService());
 			
 			//E aqui atualizamos o conteudo presente no controller
 			controller.updateFormData();
@@ -139,6 +145,15 @@ public class DepartmentListController implements Initializable {
 		catch(IOException e ) {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(),AlertType.ERROR);
 		}
+	}
+
+	
+	//Basicamente este será o nosso observador, que a partir do momento que a outra classe Controller,
+	//Emitir o sinal, efetuaremos uma ação: nesse caso a atualização dos dados
+	@Override
+	public void onDataChange() {
+		updateTableView();
+		
 	}
 	
 }
