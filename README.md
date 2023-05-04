@@ -3,6 +3,9 @@
 
 # Sobre o projeto
 
+![image](https://user-images.githubusercontent.com/78519799/236248250-f91270a1-7c35-4a48-ada5-57fa16d57e18.png) ![image](https://user-images.githubusercontent.com/78519799/236248332-7482de09-ba7d-4a39-b0fa-5be908220fb9.png)
+
+
 
 Projeto inteiro foi desenvolvido com Java e JavaFx e Jdbc, se tratando de uma interface gráfica para cadastro de vendedores e departamentos de uma loja.
 
@@ -18,6 +21,7 @@ Todo o projeto foi feito com foco no aprendizado da linguagem e sua framework
 - JavaFx
 - MySQl
 - Maven
+- Scene Builder
 
 ## Implantação em produção
 - Banco de dados: MySql
