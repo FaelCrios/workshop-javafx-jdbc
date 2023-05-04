@@ -1,5 +1,6 @@
 package gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +17,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -24,23 +27,26 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Seller;
+import model.services.DepartmentService;
 import model.services.SellerService;
 
 public class SellerListController implements Initializable, DataChangeListener {
 
+	private SellerService service;
+
 	@FXML
 	private TableView<Seller> tableViewSeller;
-
-	private SellerService service;
 
 	@FXML
 	private TableColumn<Seller, Integer> tableColumnId;
 
 	@FXML
 	private TableColumn<Seller, String> tableColumnName;
-	
+
 	@FXML
 	private TableColumn<Seller, String> tableColumnEmail;
 	
@@ -50,8 +56,6 @@ public class SellerListController implements Initializable, DataChangeListener {
 	@FXML
 	private TableColumn<Seller, Double> tableColumnBaseSalary;
 	
-	
-
 	@FXML
 	private TableColumn<Seller, Seller> tableColumnEDIT;
 
@@ -62,6 +66,71 @@ public class SellerListController implements Initializable, DataChangeListener {
 	private Button btNew;
 
 	private ObservableList<Seller> obsList;
+
+	@FXML
+	public void onBtNewAction(ActionEvent event) {
+		Stage parentStage = Utils.currentStage(event);
+		Seller obj = new Seller();
+		createDialogForm(obj, "/gui/SellerForm.fxml", parentStage);
+	}
+
+	public void setSellerService(SellerService service) {
+		this.service = service;
+	}
+
+	@Override
+	public void initialize(URL url, ResourceBundle rb) {
+		initializeNodes();
+	}
+
+	private void initializeNodes() {
+		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
+		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+		tableColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+		tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy");
+		tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
+		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2);
+
+		Stage stage = (Stage) Main.getMainScene().getWindow();
+		tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
+	}
+
+	public void updateTableView() {
+		if (service == null) {
+			throw new IllegalStateException("Service was null");
+		}
+		List<Seller> list = service.findAll();
+		obsList = FXCollections.observableArrayList(list);
+		tableViewSeller.setItems(obsList);
+		initEditButtons();
+		initRemoveButtons();
+	}
+
+	private void createDialogForm(Seller obj, String absoluteName, Stage parentStage) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			Pane pane = loader.load();
+
+			SellerFormController controller = loader.getController();
+			controller.setSeller(obj);
+			controller.setService(new SellerService(), new DepartmentService());
+			controller.loadAssociatedObjects();
+			controller.subscribeDataChangeListener(this);
+			controller.updateFormData();
+
+			Stage dialogStage = new Stage();
+			dialogStage.setTitle("Enter Seller data");
+			dialogStage.setScene(new Scene(pane));
+			dialogStage.setResizable(false);
+			dialogStage.initOwner(parentStage);
+			dialogStage.initModality(Modality.WINDOW_MODAL);
+			dialogStage.showAndWait();
+		} catch (IOException e) {
+			e.printStackTrace();
+			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
+		}
+	}
 
 	private void initEditButtons() {
 		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
@@ -76,8 +145,8 @@ public class SellerListController implements Initializable, DataChangeListener {
 					return;
 				}
 				setGraphic(button);
-			//	button.setOnAction(
-				//		event -> createDialogForm(obj, "/gui/SellerForm.fxml", Utils.currentStage(event)));
+				button.setOnAction(
+						event -> createDialogForm(obj, "/gui/SellerForm.fxml", Utils.currentStage(event)));
 			}
 		});
 	}
@@ -101,119 +170,25 @@ public class SellerListController implements Initializable, DataChangeListener {
 	}
 
 	private void removeEntity(Seller obj) {
-		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete ?");
-		
-		if(result.get() == ButtonType.OK) {
-			if(service == null) {
+		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
 
-			throw new IllegalStateException("Servicewas null");
+		if (result.get() == ButtonType.OK) {
+			if (service == null) {
+				throw new IllegalStateException("Service was null");
 			}
 			try {
 				service.remove(obj);
 				updateTableView();
-			}catch(DbIntegrityException e) {
+			}
+			catch (DbIntegrityException e) {
 				Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
 			}
-			}
-	}
-
-	public void onBtNewAction(ActionEvent event) {
-		Stage parentStage = Utils.currentStage(event);
-		Seller obj = new Seller();
-
-	}
-
-	public void setSellerService(SellerService service) {
-		this.service = service;
-	}
-
-	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		initializeNodes();
-
-	}
-
-
-		//precisa ser identido ao que está na classe!
-	private void initializeNodes() {
-		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
-		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
-		tableColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
-		tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
-		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy");
-		tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
-		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2);
-
-		Stage stage = (Stage) Main.getMainScene().getWindow();
-
-		tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
-
-	}
-
-	public void updateTableView() {
-		if (service == null) {
-			throw new IllegalStateException("Service was null");
 		}
-		List<Seller> list = service.findAll();
-		obsList = FXCollections.observableArrayList(list);
-		tableViewSeller.setItems(obsList);
-		initEditButtons();
-		initRemoveButtons();
 	}
-	
-//	private void createDialogForm(Seller obj, String absoluteName, Stage parentStage) {
-//		try {
-//			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
-//
-//			// Carregamos o nosso pane, que será nosso formulario
-//			Pane pane = loader.load();
-//
-//			// Aqui passaremos uma referencia para o nosso controlador, para que seja
-//			// possivel
-//			// Alterar seu conteudo
-//			SellerFormController controller = loader.getController();
-//
-//			// Passamos nossa referencia como haviamos criado a nossa instanciação no
-//			// arquivo pai
-//			controller.setSeller(obj);
-//
-//			// Injeção de dependencia do SellerService
-//			controller.setSellerService(new SellerService());
-//
-//			// Inscrição para o evento do subject
-//			controller.subscribeDataChangeListener(this);
-//
-//			// E aqui atualizamos o conteudo presente no controller
-//			controller.updateFormData();
-//
-//			// Quando vamos iniciar uma janela de dialogo em frente ao nosso stage, é
-//			// necessario
-//			// instancia um novo stage desa forma o dialogStage
-//			Stage dialogStage = new Stage();
-//
-//			// E aqui entram as configurações
-//			dialogStage.setTitle("Enter department data");
-//
-//			// Definimos qual sera o stage que iremos carregar
-//			dialogStage.setScene(new Scene(pane));
-//
-//			// Se poderemos mudar o tamanho de nossa tela
-//			dialogStage.setResizable(false);
-//
-//			// A partir de quem que ele irá surgir
-//			dialogStage.initOwner(parentStage);
-//
-//			// E qual será o tipo de janela que ele irá ser
-//			dialogStage.initModality(Modality.WINDOW_MODAL);
-//			dialogStage.showAndWait();
-//		} catch (IOException e) {
-//			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
-//		}
 
 	@Override
 	public void onDataChange() {
 		updateTableView();
-
+		
 	}
-
 }
