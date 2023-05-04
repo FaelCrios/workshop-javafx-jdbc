@@ -27,7 +27,6 @@ Todo o projeto foi feito com foco no aprendizado da linguagem e sua framework
 ## Back end
 Pré-requisitos: Java 11
 
-```bash
 # clonar repositório
 git clone https://github.com/FaelCrios/workshop-javafx-jdbc
 
