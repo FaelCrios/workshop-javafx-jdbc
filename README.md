@@ -27,10 +27,10 @@ Todo o projeto foi feito com foco no aprendizado da linguagem e sua framework
 ## Back end
 Pré-requisitos: Java 11
 
-# clonar repositório
+### clonar repositório
 git clone https://github.com/FaelCrios/workshop-javafx-jdbc
 
-## entrar na pasta do projeto back end
+### entrar na pasta do projeto back end
 
 E rodar o sistema com as configurações de parâmetro: --module-path "C:\java-libs\javafx-sdk\lib" --add-modules=javafx.fxml,javafx.controls
 
