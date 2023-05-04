@@ -1,5 +1,5 @@
 # WORKSHOP-JAVAFX-JDBC
-[![NPM](https://img.shields.io/npm/l/react)](https://github.com/FaelCrios/workshop-javafx-jdbc/blob/master/LICENCE) 
+[![NPM](https://img.shields.io/npm/l/reacthttps://github.com/FaelCrios/workshop-javafx-jdbc/blob/master/LICENSE) 
 
 # Sobre o projeto
 
